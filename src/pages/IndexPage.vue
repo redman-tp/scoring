@@ -1,13 +1,37 @@
 <template>
-  <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-vertical.svg"
-      style="width: 200px; height: 200px"
-    >
+  <q-page class="q-pa-md">
+    <q-table
+      :rows="teams"
+      :columns="columns"
+      row-key="id"
+      :rows-per-page-options="[10, 20, 50]"
+      :pagination="initialPagination"
+    />
   </q-page>
 </template>
 
-<script setup>
-//
+<script>
+import { db } from 'src/firebase.js';
+import { collection, onSnapshot } from 'firebase/firestore';
+
+export default {
+  data() {
+    return {
+      teams: [],
+      initialPagination: { rowsPerPage: 10 },
+      columns: [
+        { name: 'team', label: 'Team Name', field: 'team', align: 'left' },
+        { name: 'finalScore', label: 'Final Score', field: 'finalScore' }
+      ]
+    };
+  },
+  mounted() {
+    onSnapshot(collection(db, 'teams'), (snapshot) => {
+      this.teams = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    });
+  }
+};
 </script>
